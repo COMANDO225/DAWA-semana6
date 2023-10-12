@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import Usuario from "../model/user.model";
+import { encriptar } from "../../../utils/handleBcrypt";
 
 export const getAllUsers = async (req: Request, res: Response) => {
 	try {
@@ -48,9 +49,15 @@ export const createUser = async (req: Request, res: Response) => {
 			});
 		}
 
-		const contraEncriptada = await res
-			.status(200)
-			.json({ data: "usuario creado" });
+		const contraEncriptada = await encriptar(password);
+		const newUsuario = new Usuario({
+			nombre,
+			email,
+			password: contraEncriptada,
+		});
+		await newUsuario.save();
+
+		res.status(200).json({ data: "usuario creado" });
 	} catch (error) {
 		console.log(error);
 	}
